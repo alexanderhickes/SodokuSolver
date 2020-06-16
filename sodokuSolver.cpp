@@ -5,6 +5,7 @@ using namespace std;
 #include <cctype>
 #include <sstream>
 #include <string>
+#include <vector>
 
 class SodokuGame {
 
@@ -111,7 +112,7 @@ class SodokuGame {
 
                 
             }
-            
+
             if (input_file.eof()) {
                     break;
 
@@ -125,9 +126,17 @@ class SodokuGame {
 
     }
 
-    private: void showGrid() {
+    public: void setCellValue(int i, int j, int cellValue) {
+        grid[i][j] = cellValue;
+    }
 
-        cout << "The puzzle you have entered is:\n";
+    public: int getCellValue(int i, int j) {
+        return grid[i][j];
+    }
+
+    public: void showGrid() {
+
+        cout << "\n";
         
         for (int i = 0; i < 9; i++) {
             for (int j = 0; j < 9; j++) {
@@ -137,11 +146,145 @@ class SodokuGame {
         }
 
     }
+
+    public: bool puzzleSolved() {
+
+        for (int i = 0; i < 9; i++) {
+            for (int j = 0; j < 9; j++) {
+
+                if (grid[i][j] == 0) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+};
+
+class SodokuSolver {
+
+    SodokuGame puzzle;
+
+    public: SodokuSolver() {
+        cout << "Lets try solve this fucking thing...\n";
+        solve();
+    }
+
+    private: void solve() {
+        int valueToCheck = 1;
+        while (!puzzle.puzzleSolved()) {
+            int cellChanges = 0;
+            for (int i = 0; i < 9; i++) {
+            std::vector <int> possibleValues;
+            int insertionCol;
+
+                for (int j = 0; j < 9; j++) {
+                        
+                    if (puzzle.getCellValue(i, j) != 0) {
+                        continue;
+                    }
+                    else {
+
+                        if (rowValidifier(i, valueToCheck)) {
+                            if (colValidifier(j, valueToCheck) && subgridValidifier(i, j, valueToCheck)) {
+                                
+                                cout << valueToCheck << " is a valid value for cell [" << i + 1 << "][" << j + 1 << "].\n";
+                                possibleValues.push_back(valueToCheck);
+                                insertionCol = j;
+
+                            }
+                        }
+                        else {
+                            i++;
+                            continue;
+                        }
+                    }
+                }
+
+                if (possibleValues.size() == 1) {
+                    cout << "Looks like " << valueToCheck << " has to go in [" << i + 1 << "][" << insertionCol + 1 << "].\n";
+                    cout << "DEBUG - i: " << i << ", insertionCol: " << insertionCol << ", valueToCheck: " << valueToCheck;
+                    puzzle.setCellValue(i, insertionCol, valueToCheck);
+                    puzzle.showGrid();
+                    cellChanges++;
+                    i++;
+                }
+                else {
+                    cout << "Seems like there are " << possibleValues.size() << " cells which can store a " << valueToCheck << " in row " << i + 1 << ".\n";
+                }
+            }
+            cout << "After checking each cell for whether a " << valueToCheck << " was absolute, " << cellChanges << " cell changes were made.";
+            puzzle.showGrid();
+
+            if (valueToCheck < 9) {
+                valueToCheck++;
+            }
+            else {
+                valueToCheck = 1;
+            }
+        }
+
+        //Go to the first cell, check if there is a value already entered. If so, skip to next
+        //This needs to call 3 functions:
+        //rowValidifier
+        //colValidifier
+        //subgridValidifier
+
+
+    }
+
+    private: bool rowValidifier(int rowValue, int valueToCheck) {
+
+        //Scan along a row until 0 is found. 
+        //Scan along row to eliminate numbers already wntered on that row.
+        //make a list of possibilities until there is only one possible value for that cell
+
+        for (int j = 0; j < 9; j++) {
+            if (puzzle.getCellValue(rowValue, j) == valueToCheck) {
+                cout << "Looks like " << valueToCheck << " is already in row [" << rowValue << "].\n";
+                return false;
+            }
+        }
+        return true;
+
+    }
+
+    private: bool colValidifier(int colValue, int valueToCheck) {
+        
+        for (int i = 0; i < 9; i++) {
+            if (puzzle.getCellValue(i, colValue) == valueToCheck) {
+                cout << "Looks like " << valueToCheck << " is already in column [" << colValue << "].\n";
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private: bool subgridValidifier(int cellRow, int cellCol, int valueToCheck) {
+        
+        int subStartPoint[3] = {0, 3, 6};
+        int subEndPoint[3] = {2, 5, 8};
+        int startRow = cellRow / 3;
+        int startCol = cellCol / 3;
+
+        for (int i = subStartPoint[startRow]; i <= subEndPoint[startRow]; i++) {
+            for (int j = subStartPoint[startCol]; j <= subEndPoint[startCol]; j++) {
+
+                if (puzzle.getCellValue(i, j) == valueToCheck) {
+                    cout << "Looks like " << valueToCheck << " is already in subgrid [" << startRow + 1 << "][" << startCol + 1 << "].\n";
+                    return false;
+                }
+            }
+        }
+        return true; 
+    }
+
 };
 
 int main() {
 
-    SodokuGame sg;
+    // SodokuGame sg;
+    SodokuSolver ss;
     return 0;
 
 }
