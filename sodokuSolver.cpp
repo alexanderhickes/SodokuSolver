@@ -1,6 +1,8 @@
 using namespace std;
 
 #include <iostream>
+#include <fstream>
+#include <cctype>
 
 class SodokuGame {
 
@@ -26,26 +28,33 @@ class SodokuGame {
         if (option == 2) {
             //loadFilePuzzle();
         }
-
-        
     }
 
     private: int cliGetOption() {
+
         int option;
         bool valid_input = false;
         while (valid_input == false) {
+            
+            if (cin.fail()) {
+                valid_input = false;
+                cin.clear();
+                cin.ignore(100, '\n');
+            }
+
             cin >> option;
 
-            if (option != 1 || option != 2) {
+            if (option >= 1 && option <= 2) {
 
-                // input provided is not valid
+                return option;
 
-                cout << option << " is an incorrect option. Type 1 for command input. Type 2 for file input.";
             }
             else {
-                return option;
+                // input provided is not valid
+                cout << option << " is an incorrect option. Type 1 for command input. Type 2 for file input.";
             }
         }
+        return 0;
     }
 
     private: void loadCliPuzzle() {
@@ -58,11 +67,11 @@ class SodokuGame {
             for (int colIter = 1; colIter <= 9; colIter++) {
                 
                 int position;
-                cout << "Enter position: " << rowIter << ", " << colIter << " of the puzzle. Type 0 for blanks.";
+                cout << "Enter position: [" << rowIter << "][" << colIter << "] of the puzzle. Type 0 for blanks.";
                 
                 cin >> position;
                 
-                if (position >= 0 && position >= 9) {
+                if (position >= 0 && position < 9) {
                     grid[rowIter][colIter] = position;
                 }
                 else {
@@ -72,13 +81,60 @@ class SodokuGame {
             }
         }
         
-        cout << "The puzzle you have entered is:/n";
+        showGrid();
+    }
+
+    private: void loadFilePuzzle() {
+
+        char filename[30];
+
+        cout << "The file which will be read will be called: InputPuzzle.txt";
+        ifstream input_file;
+        input_file.open("InputPuzzle.txt", ios::in);
+
+        for (int rowIter = 1; rowIter <= 9; rowIter++) {
+            for (int colIter = 1; colIter <= 9; colIter++) {
+                int readValue;
+                input_file>>readValue;
+
+                if (!(readValue >= 0 || readValue <= 9)) {
+                    cout << "Value for cell [" << (rowIter * 9) + colIter + 1 << "] is incorrect. Please fix.";
+                    exit(EXIT_FAILURE);
+                }
+
+                grid[rowIter][colIter] = readValue;
+
+                if (input_file.eof()) {
+                    break;
+                }
+
+            }
+        }
+
+        input_file.close();
+        cout << endl;
+
+        showGrid();
+
+    }
+
+    private: void showGrid() {
+
+        cout << "The puzzle you have entered is:\n";
         
         for (int i = 1; i <= 9; i++) {
             for (int j = 1; j <= 9; j++) {
                 cout << grid[i][j];
             }
-            cout << "/n";
+            cout << "\n";
         }
+
     }
 };
+
+int main() {
+
+    SodokuGame sg;
+    return 0;
+
+}
