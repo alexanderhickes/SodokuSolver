@@ -3,6 +3,8 @@ using namespace std;
 #include <iostream>
 #include <fstream>
 #include <cctype>
+#include <sstream>
+#include <string>
 
 class SodokuGame {
 
@@ -26,7 +28,7 @@ class SodokuGame {
             loadCliPuzzle();
         }
         if (option == 2) {
-            //loadFilePuzzle();
+            loadFilePuzzle();
         }
     }
 
@@ -86,16 +88,19 @@ class SodokuGame {
 
     private: void loadFilePuzzle() {
 
-        char filename[30];
-
-        cout << "The file which will be read will be called: InputPuzzle.txt";
+        cout << "The file which will be read will be called: InputPuzzle.txt\n";
         ifstream input_file;
         input_file.open("InputPuzzle.txt", ios::in);
 
-        for (int rowIter = 1; rowIter <= 9; rowIter++) {
-            for (int colIter = 1; colIter <= 9; colIter++) {
-                int readValue;
-                input_file>>readValue;
+        for (int rowIter = 0; rowIter < 9; rowIter++) {
+
+            string readLine;
+            input_file >> readLine;
+
+            for (int colIter = 0; colIter < 9; colIter++) {
+                
+                int readValue = std::stoi(readLine.substr(colIter, 1));
+                
 
                 if (!(readValue >= 0 || readValue <= 9)) {
                     cout << "Value for cell [" << (rowIter * 9) + colIter + 1 << "] is incorrect. Please fix.";
@@ -104,9 +109,11 @@ class SodokuGame {
 
                 grid[rowIter][colIter] = readValue;
 
-                if (input_file.eof()) {
+                
+            }
+            
+            if (input_file.eof()) {
                     break;
-                }
 
             }
         }
@@ -122,8 +129,8 @@ class SodokuGame {
 
         cout << "The puzzle you have entered is:\n";
         
-        for (int i = 1; i <= 9; i++) {
-            for (int j = 1; j <= 9; j++) {
+        for (int i = 0; i < 9; i++) {
+            for (int j = 0; j < 9; j++) {
                 cout << grid[i][j];
             }
             cout << "\n";
